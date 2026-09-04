@@ -1,0 +1,74 @@
+{
+  "$comment": "Field definitions for the ARA discharge point layers (ARA_inlet_<year>).",
+  "fields": [
+    {
+      "name": "ARA_Nr",
+      "type": "integer",
+      "title": "Plant number",
+      "description": "Identification number of the treatment plant. Joins to the catchment and location layers of the same year.",
+      "constraints": {
+        "minimum": 100,
+        "maximum": 999999
+      }
+    },
+    {
+      "name": "Adresse",
+      "type": "string",
+      "title": "Plant name",
+      "description": "Name of the treatment plant. The field name says address but the content is the plant name; kept as-is so the file and this description agree."
+    },
+    {
+      "name": "GEWISS_Nr",
+      "type": "integer",
+      "title": "Water body number",
+      "description": "Identifier of the receiving water body in the GEWISS register. The expansion of GEWISS is not confirmed; see eawag:pending."
+    },
+    {
+      "name": "NAME",
+      "type": "string",
+      "title": "Water body name",
+      "description": "Name of the water body receiving the treated effluent."
+    },
+    {
+      "name": "Source",
+      "type": "string",
+      "title": "Source",
+      "description": "Which dataset the discharge point information came from."
+    },
+    {
+      "name": "Comment",
+      "type": "string",
+      "title": "Comment",
+      "description": "Notes, including where there is no receiving water body and the effluent seeps away instead."
+    },
+    {
+      "name": "inlet_x",
+      "type": "number",
+      "title": "Easting",
+      "unit": "m",
+      "description": "Easting of the discharge point in EPSG:2056. A convenience copy of the geometry rather than an independent measurement."
+    },
+    {
+      "name": "inlet_y",
+      "type": "number",
+      "title": "Northing",
+      "unit": "m",
+      "description": "Northing of the discharge point in EPSG:2056. A convenience copy of the geometry rather than an independent measurement."
+    },
+    {
+      "name": "geom",
+      "type": "geojson",
+      "title": "Geometry",
+      "description": "Discharge point. Point in EPSG:2056."
+    }
+  ],
+  "primaryKey": [
+    "ARA_Nr"
+  ],
+  "eawag:pending": [
+    "Confirm what GEWISS stands for. It appears as a keyword in the FOEN geocat record but the expansion was not verified, so it has deliberately not been written down as fact.",
+    "Confirm whether inlet_x and inlet_y can ever disagree with geom.",
+    "Confirm the missing-value convention actually used in the files, then add a missingValues array to this schema.",
+    "Confirm any remaining columns."
+  ]
+}

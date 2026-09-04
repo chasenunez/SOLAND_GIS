@@ -1,0 +1,22 @@
+{
+  "$comment": "Representative response headers for a plain FOEN zip download. Header names are lower-cased by Http.get_headers before the parser sees them, so they are stored lower-cased here.",
+  "with_etag": {
+    "content-type": "application/zip",
+    "content-length": "66573824",
+    "last-modified": "Thu, 25 Apr 2024 09:12:44 GMT",
+    "etag": "\"3f7a1c9d8b2e4056\"",
+    "accept-ranges": "bytes"
+  },
+  "without_etag": {
+    "content-type": "application/zip",
+    "content-length": "66573824",
+    "last-modified": "Thu, 25 Apr 2024 09:12:44 GMT"
+  },
+  "length_only": {
+    "content-type": "application/zip",
+    "content-length": "66573824"
+  },
+  "nothing_useful": {
+    "content-type": "application/zip"
+  }
+}

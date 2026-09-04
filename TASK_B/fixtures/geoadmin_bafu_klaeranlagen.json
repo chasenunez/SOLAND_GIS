@@ -1,0 +1,24 @@
+{
+  "stac_version": "1.0.0",
+  "id": "ch.bafu.gewaesserschutz-klaeranlagen",
+  "title": "Database of wastewater treatment plants (ARA-DB)",
+  "description": "Since the 1980s, the FOEN has kept a database with information about the central ARA.",
+  "summaries": {"proj:epsg": [21781]},
+  "extent": {
+    "spatial": {"bbox": [[5.96, 45.82, 10.49, 47.81]]},
+    "temporal": {"interval": [["2014-01-01T00:00:00Z", "2014-01-01T00:00:00Z"]]}
+  },
+  "providers": [
+    {
+      "name": "Federal Office for the Environment FOEN",
+      "roles": ["producer", "licensor"],
+      "url": "https://www.bafu.admin.ch/bafu/en/home.html"
+    }
+  ],
+  "license": "proprietary",
+  "created": "2022-07-11T12:15:04.639288Z",
+  "updated": "2026-03-19T09:42:47.639018Z",
+  "itemType": "Feature",
+  "assets": {},
+  "type": "Collection"
+}

@@ -1,0 +1,35 @@
+# Dependencies for the TLM/LN workflow.
+#
+#   pip install -r requirements.txt
+#
+# Minimums rather than exact pins. Exact pins would be dishonest here: this was
+# developed and tested against the versions listed at the bottom, but not against
+# whatever combination your environment resolves to, and pinning implies a
+# guarantee that has not been earned. The minimums are real, though, and each one
+# is there for a reason:
+#
+#   geopandas 1.0  changed `to_file` so that mode="w" replaces a single layer in
+#                  a GeoPackage instead of the whole file. The workflow writes
+#                  several layers to one file, so on an older version each write
+#                  would destroy the previous ones.
+#   shapely 2.0    `make_valid`, `normalize` and vectorised `intersection` are
+#                  used throughout. The 1.x API is different enough that the code
+#                  will not run at all.
+#   pandas 2.0     nullable integer dtypes are relied on when joining lookup
+#                  codes, so a missing code stays missing rather than becoming a
+#                  float.
+#
+# Python 3.11 or later, for tomllib in the standard library. On 3.10, add tomli.
+
+geopandas>=1.0
+pandas>=2.0
+shapely>=2.0
+matplotlib>=3.5
+pyogrio>=0.7
+
+# Verified working on 2026-08-21 with:
+#   geopandas 1.1.4, pandas 2.3.3, shapely 2.1.2, pyogrio 0.13.0
+#
+# Every run also writes the versions it actually used into
+# <output>.manifest.json, which is the record that matters when someone asks
+# months later why a result changed.

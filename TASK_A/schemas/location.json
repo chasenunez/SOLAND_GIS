@@ -1,0 +1,85 @@
+{
+  "$comment": "Field definitions for the ARA plant location layers (ARA_loc_<year>).",
+  "fields": [
+    {
+      "name": "ARA_Nr",
+      "type": "integer",
+      "title": "Plant number",
+      "description": "Identification number of the treatment plant. Joins to the catchment and discharge layers of the same year.",
+      "constraints": {
+        "minimum": 100,
+        "maximum": 999999
+      }
+    },
+    {
+      "name": "ARA_Name",
+      "type": "string",
+      "title": "Plant name",
+      "description": "Name of the treatment plant."
+    },
+    {
+      "name": "Kanton",
+      "type": "string",
+      "title": "Canton",
+      "description": "Canton in which the plant is located, as the two-letter abbreviation.",
+      "constraints": {
+        "pattern": "^[A-Z]{2}$"
+      }
+    },
+    {
+      "name": "m_ueber_Meer",
+      "type": "number",
+      "title": "Elevation",
+      "unit": "m",
+      "description": "Elevation of the plant building, not of the catchment. The vertical datum is not yet recorded; see eawag:pending. Swiss elevations are either LN02 or LHN95 and the two differ by up to roughly 0.5 m, so this value should not be used for anything datum-sensitive until confirmed."
+    },
+    {
+      "name": "Bezeichnung",
+      "type": "string",
+      "title": "Responsible body",
+      "description": "Body responsible for the plant, such as a municipality or an operating organisation. Names organisations, not individuals."
+    },
+    {
+      "name": "Strasse",
+      "type": "string",
+      "title": "Street",
+      "description": "Street address of the plant."
+    },
+    {
+      "name": "PLZ",
+      "type": "integer",
+      "title": "Postal code",
+      "description": "Swiss postal code.",
+      "constraints": {
+        "minimum": 1000,
+        "maximum": 9999
+      }
+    },
+    {
+      "name": "Ort",
+      "type": "string",
+      "title": "Locality",
+      "description": "Locality of the plant."
+    },
+    {
+      "name": "erhebungsjahr",
+      "type": "year",
+      "title": "Survey year",
+      "description": "Year in which the plant record was surveyed, as adapted during compilation."
+    },
+    {
+      "name": "geom",
+      "type": "geojson",
+      "title": "Geometry",
+      "description": "Plant location. Point in EPSG:2056."
+    }
+  ],
+  "primaryKey": [
+    "ARA_Nr"
+  ],
+  "eawag:pending": [
+    "Record the vertical datum for m_ueber_Meer: LN02 or LHN95.",
+    "Confirm the missing-value convention actually used in the files, then add a missingValues array to this schema.",
+    "Confirm any remaining columns, including those shared with the catchment layer."
+  ]
+}

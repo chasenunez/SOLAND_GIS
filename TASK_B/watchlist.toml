@@ -1,0 +1,179 @@
+# Datasets to watch for updates.
+#
+# Every collection id, topic and URL below was checked and confirmed to resolve
+# on 2026-08-10. Nothing here is guessed. If you add an entry, please check the
+# identifier yourself first: a mistyped collection id produces an empty response
+# rather than an error, so a broken watch looks exactly like a quiet dataset.
+#
+# policy:
+#   "notify"  report the change, do nothing else. The default, and the right
+#             choice for anything large or anything you would want to inspect
+#             before it lands.
+#   "fetch"   also download into the staging folder and verify the checksum.
+#             Nothing is ever written outside this project folder.
+#   "manual"  no automated check exists. Reported every run so it is not
+#             forgotten, with the reason recorded.
+
+[settings]
+state_file = "state.json"
+report_dir = "reports"
+staging_dir = "staging"
+
+# Seconds to wait between requests to the same host. geodienste.ch publishes a
+# fair-use limit of 20 website requests per minute and may restrict access when
+# it is exceeded, so 3 seconds keeps a 26-canton topic comfortably inside it.
+min_seconds_between_requests = 3.0
+timeout_seconds = 30.0
+
+# Hard ceiling on downloads per run. geodienste allows one dataset per offering
+# per day, and a single topic expands to 26 cantons, so an unbounded fetch policy
+# would breach their terms on the first busy week.
+max_downloads_per_run = 2
+
+
+# ---------------------------------------------------------------------------
+# swisstopo
+# ---------------------------------------------------------------------------
+
+[[dataset]]
+id = "swisstlm3d"
+title = "swissTLM3D"
+source = "geoadmin_stac"
+collection = "ch.swisstopo.swisstlm3d"
+policy = "notify"
+used_by = "01_tlm_prepare.ipynb"
+notes = """
+Supplies the three layers the TLM preparation notebook reads: Bodenbedeckung,
+Nutzungsareal and Siedlungsname. Published roughly yearly, though irregularly.
+Notify rather than fetch: the download runs to gigabytes and rerunning the
+preparation notebook is a deliberate decision, not something to trigger by
+accident.
+"""
+
+[[dataset]]
+id = "swissboundaries3d"
+title = "swissBOUNDARIES3D"
+source = "geoadmin_stac"
+collection = "ch.swisstopo.swissboundaries3d"
+policy = "notify"
+used_by = "02_ln_tlm_yearly_calc.ipynb (cantonal boundaries)"
+notes = "Cantonal and municipal boundaries. Changes rarely but does change."
+
+# The two entries above are the swisstopo landscape models this project uses.
+# The swisstopo Landscape Models page lists five others: swissBUILDINGS3D 2.0
+# and 3.0 Beta, swissNAMES3D, swissTLMRegio and swissTNE. All are published
+# through the same STAC catalogue, so adding one is a four-line entry with the
+# right collection id and no code change. Two were confirmed to resolve on
+# 2026-09-04, in case they are wanted later:
+#
+#   ch.swisstopo.swissnames3d     updated 2026-04-29
+#   ch.swisstopo.swisstlmregio    updated 2026-06-25
+#
+# They are not watched here because the TLM/LN workflow does not read them.
+
+
+# ---------------------------------------------------------------------------
+# Cantonal data via geodienste.ch
+#
+# One Observation per canton, because cantons publish independently. A change in
+# one canton is exactly the signal that would otherwise be lost in a single
+# topic-level timestamp.
+# ---------------------------------------------------------------------------
+
+[[dataset]]
+id = "ln-nutzungsflaechen"
+title = "Landwirtschaftliche Nutzungsflächen (LN)"
+source = "geodienste"
+base_topic = "lwb_nutzungsflaechen"
+policy = "notify"
+used_by = "02_ln_tlm_yearly_calc.ipynb"
+notes = """
+The yearly agricultural land use data. Cantons currently split across model
+versions 2.0 and 3.0, which is why the notebook merges two shapefile trees. Using
+base_topic rather than topic returns both versions in one query.
+"""
+
+[[dataset]]
+id = "ara-klaeranlagen"
+title = "Abwasserreinigungsanlagen (ARA) ohne Finanzkennzahlen"
+source = "geodienste"
+base_topic = "klaeranlagen_ohne_finanzkennzahlen"
+policy = "notify"
+used_by = "ARA / WWTP 2019-2025 dataset"
+notes = """
+Source for the ARA dataset. Coverage is still being built out: on 2026-08-10, 11
+of 27 listed cantons and principalities were publishing, with the rest announced
+between October 2026 and April 2028. Watching this is how you learn that a new
+canton has come online, which is the main reason to revise the ARA dataset.
+"""
+
+
+# ---------------------------------------------------------------------------
+# FOEN (BAFU)
+#
+# Most FOEN water layers are in the federal STAC catalogue, so they get the good
+# treatment. A few are bare zip files with no API, and those fall back to
+# response headers.
+# ---------------------------------------------------------------------------
+
+[[dataset]]
+id = "bafu-ara-db"
+title = "Kläranlagendatenbank (ARA-DB), FOEN"
+source = "geoadmin_stac"
+collection = "ch.bafu.gewaesserschutz-klaeranlagen"
+policy = "notify"
+used_by = "ARA / WWTP 2019-2025 dataset"
+notes = """
+The FOEN wastewater plant database. The water geodata page describes the download
+as available on request, but the catalogue entry is public and carries an updated
+timestamp, so the dataset can be watched even though it cannot be fetched. Its
+data reference date is still 2014-01-01, which is the gap the Eawag dataset fills.
+"""
+
+[[dataset]]
+id = "bafu-einzugsgebiete"
+title = "Topographische Einzugsgebiete Schweizer Gewässer"
+source = "geoadmin_stac"
+collection = "ch.bafu.wasser-einzugsgebietsgliederung"
+policy = "notify"
+notes = "Topographic catchments, edition 2024. Relevant to any catchment-based analysis."
+
+[[dataset]]
+id = "bafu-flussordnungszahlen"
+title = "Flussordnungszahlen (FLOZ) für das digitale Gewässernetz"
+source = "http_headers"
+url = "https://www.bafu.admin.ch/dam/en/sd-web/beh3IJKG3bLy/flussordnungszahlenflozfuerdasdigitalegewaessernetzderschweiz.zip"
+policy = "notify"
+notes = """
+Published as a plain zip with no API, so the only available signal is the
+response headers. This is the pattern FOEN intend to move away from as their data
+migrates to databases and platforms; when that happens, change source to
+"geoadmin_stac" and add the collection id. One line, no other edits.
+"""
+
+[[dataset]]
+id = "bafu-karst-groundwater"
+title = "Karst groundwater extent, FOEN"
+source = "manual"
+policy = "manual"
+url = "https://data.bafu.admin.ch/download/water/karst-groundwater/v2026-03-17/extent/water_karst-groundwater_extent.zip"
+manual_reason = """
+The version is embedded in the URL path (v2026-03-17), so watching a fixed URL
+would never see a new release: a new version appears at a different address
+entirely. No documented listing endpoint for data.bafu.admin.ch was found, and an
+endpoint inferred from a naming pattern would fail silently. Check the FOEN water
+geodata page a few times a year, or ask FOEN whether an index exists.
+"""
+
+[[dataset]]
+id = "bafu-ara-db-download"
+title = "ARA-DB full download (on request)"
+source = "manual"
+policy = "manual"
+url = "https://www.bafu.admin.ch/en/water-geodata"
+manual_reason = """
+The FOEN water geodata page lists the ARA-DB download as available only on
+request to the Water Division, so there is nothing to poll. The catalogue entry
+is watched separately as "bafu-ara-db"; when that reports a change, that is the
+moment to ask FOEN for a fresh extract.
+"""

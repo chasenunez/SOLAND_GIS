@@ -1,0 +1,51 @@
+{
+  "$comment": "Field definitions for the ARA catchment layers (ARA_EZG_<year>). Referenced by datapackage.json rather than repeated in each of the seven yearly resources, so a correction is made once.",
+  "fields": [
+    {
+      "name": "ARA_Nr",
+      "type": "integer",
+      "title": "Plant number",
+      "description": "Identification number of the treatment plant, following FOEN numbering unless the Comment field says otherwise.",
+      "constraints": {
+        "minimum": 100,
+        "maximum": 999999
+      }
+    },
+    {
+      "name": "ARA_Name",
+      "type": "string",
+      "title": "Plant name",
+      "description": "Name of the treatment plant."
+    },
+    {
+      "name": "alternative_ARA_Nr",
+      "type": "integer",
+      "title": "Alternative plant number",
+      "description": "Identification number used by VSA or by a canton where it differs from the FOEN number. The source readme listed this field twice, which may mean there are two such columns rather than one; see eawag:pending.",
+      "constraints": {
+        "minimum": 100,
+        "maximum": 999999
+      }
+    },
+    {
+      "name": "Comment",
+      "type": "string",
+      "title": "Comment",
+      "description": "Notes on any change to ARA_Nr, for example where FOEN and cantonal numbering differ."
+    },
+    {
+      "name": "geom",
+      "type": "geojson",
+      "title": "Geometry",
+      "description": "Catchment boundary. Polygon in EPSG:2056."
+    }
+  ],
+  "primaryKey": [
+    "ARA_Nr"
+  ],
+  "eawag:pending": [
+    "Confirm whether alternative_ARA_Nr is one column or two, and if two, their distinct names and meanings.",
+    "Confirm the missing-value convention actually used in the files, then add a missingValues array to this schema.",
+    "The source readme stated that redundant variables were omitted, so this layer may hold further columns. Confirm against the files and add what is missing."
+  ]
+}

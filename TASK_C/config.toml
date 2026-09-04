@@ -1,0 +1,111 @@
+# Paths and settings for the TLM/LN workflow.
+#
+# This file replaces the hardcoded Q: paths that used to live inside the
+# notebooks. Relative paths are resolved against this file's own directory, so
+# the same config works from a notebook, a script or a scheduled job without
+# anyone thinking about the working directory.
+#
+# Edit the paths below to match your machine. On Windows, either use forward
+# slashes or double the backslashes: TOML treats a single backslash as an escape.
+
+crs = "EPSG:2056"   # CH1903+ / LV95
+
+
+# ---------------------------------------------------------------------------
+# Notebook 01: preparing TLM_total from swissTLM3D
+#
+# Run this once per swissTLM3D release. The TLM is updated irregularly, roughly
+# yearly, so this is not part of the annual routine.
+# ---------------------------------------------------------------------------
+
+[tlm]
+tlm_gpkg = "Q:/Querprojekte/GeoData/Geodata_CH/by_provider/swisstopo/swissTLM3D/swissTLM3D_2026/data/swisstlm3d_2026-02-24_2056_5728.gpkg/SWISSTLM3D_2026_LV95_LN02.gpkg"
+tlm_lookup_table = "Q:/Querprojekte/GeoData/Geodata_CH/by_theme/agriculture/Agriculture_Landuse/Data/TLM_LN/TLM_LUT.csv"
+output_gpkg = "Q:/Querprojekte/GeoData/Geodata_CH/by_theme/agriculture/Agriculture_Landuse/Data/TLM_LN/TLM_total_outputs.gpkg"
+
+# Layer names inside the GeoPackage. Worth checking against a new TLM release:
+# swisstopo has renamed layers before, and a wrong name fails immediately with a
+# clear message rather than producing a quietly empty result.
+nutzungsareal_layer = "tlm_areale_nutzungsareal"
+siedlungsname_layer = "tlm_namen_siedlungsname"
+bodenbedeckung_layer = "tlm_bb_bodenbedeckung"
+
+
+# ---------------------------------------------------------------------------
+# Notebook 02: the yearly LN/TLM combination
+# ---------------------------------------------------------------------------
+
+[year]
+tlm_total_gpkg = "Q:/Querprojekte/GeoData/Geodata_CH/by_theme/agriculture/Agriculture_Landuse/Data/TLM_LN/TLM_total_outputs.gpkg"
+tlm_total_layer = "TLM_total"
+lookup_table = "Q:/Querprojekte/GeoData/Geodata_CH/by_theme/agriculture/Agriculture_Landuse/Data/TLM_LN/LN_LBZ_Lookup_Feb2026.csv"
+
+# {year} is substituted at run time, so one line covers every year.
+output_gpkg = "Q:/Querprojekte/GeoData/Geodata_CH/by_theme/agriculture/Agriculture_Landuse/Data/TLM_LN/TLM_LN_Combination_{year}.gpkg"
+
+# Group code marking LN polygons that overlay other LN polygons. In the Feb 2026
+# lookup, group 99 "Ueberlagernde Flaechen" holds four codes: 921 Hochstamm-
+# Feldobstbaeume, 922 Nussbaeume, 923 Edelkastanienbaeume, 924 Einheimische
+# Einzelbaeume und Alleen.
+#
+# This replaced an earlier rule that dropped everything with class code 6. Class
+# 6 is "Flaechen ausserhalb der LN" and also contains real ground cover: ponds
+# and ditches, ruderal areas, dry stone walls, unpaved paths, region-specific
+# biodiversity areas and home gardens. Those are now kept.
+overlap_group_code = 99
+
+# Whether to erase TLM_total with only the LN features that are kept, rather than
+# with all of them.
+#
+# false matches the concept diagram and reproduces existing results. Overlaying
+# features are removed from TLM and then not merged back, so wherever one does
+# not coincide with another LN polygon, a hole is left. Isolated trees and
+# avenues are the likely source.
+#
+# true closes those holes. The run reports the uncovered area either way, in
+# reports_<year>/gaps.csv, so the choice can be made from a number rather than a
+# guess. Change it only deliberately: it alters the output.
+erase_with_selected_only = false
+
+# Polygons below this area are dropped after an erase. Difference operations
+# along shared boundaries leave slivers a few square centimetres across that are
+# floating-point artefacts rather than features of the landscape.
+min_polygon_area_m2 = 1.0
+
+# Measure how much area the selection step leaves uncovered, and write it to
+# reports_<year>/gaps.csv. On by default: it is the number that decides
+# erase_with_selected_only above, and an unmeasured gap is the problem this whole
+# correction was about. It costs one spatial join and one difference over the
+# overlay features alone, so it is far cheaper than the erase itself. Turn it off
+# only when you want a quick run.
+compute_gap_report = true
+
+# The pairwise overlap layer is for documentation and statistics only, and is the
+# slowest step in the workflow. Turn it on when you need the numbers.
+create_overlap_layer = false
+
+# Default LN inputs. The data currently arrives split by model version, some
+# cantons on v2.0 and some on v3.0, which is why there are two.
+ln_inputs = [
+  "Q:/Querprojekte/GeoData/Geodata_CH/by_provider/Kantone_Geodienste/Landwirtschaftliche Nutzungsflächen_AgriculturalLanduse/LN_2025_Download_Mar2026/lwb_nutzungsflaechen_lv95/shapefiles/lwb_nutzungsflaechen_v2_0/nutzungsflaechen.shp",
+  "Q:/Querprojekte/GeoData/Geodata_CH/by_provider/Kantone_Geodienste/Landwirtschaftliche Nutzungsflächen_AgriculturalLanduse/LN_2025_Download_Mar2026/lwb_nutzungsflaechen_lv95/shapefiles/lwb_nutzungsflaechen_v3_0/nutzungsflaechen.shp",
+]
+
+
+# ---------------------------------------------------------------------------
+# Per-year overrides.
+#
+# Add a section when a year's inputs live somewhere else, or when it should be
+# joined against a different vintage of the lookup. Anything not overridden falls
+# back to [year] above.
+#
+# Recording the lookup used per year matters more than it looks: the lookup
+# carries validity windows, and joining a 2019 dataset against a 2026 lookup is
+# not obviously wrong but is worth doing knowingly.
+# ---------------------------------------------------------------------------
+
+# [years.2024]
+# ln_inputs = [
+#   ".../LN_2024_Download/.../lwb_nutzungsflaechen_v2_0/nutzungsflaechen.shp",
+# ]
+# lookup_table = ".../LN_LBZ_Lookup_Feb2025.csv"

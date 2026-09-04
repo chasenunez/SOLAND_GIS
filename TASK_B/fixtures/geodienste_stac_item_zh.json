@@ -1,0 +1,40 @@
+{
+  "stac_version": "1.0.0",
+  "stac_extensions": ["https://stac-extensions.github.io/file/v2.1.0/schema.json"],
+  "type": "Feature",
+  "id": "lwb_nutzungsflaechen_v2_0-ZH",
+  "collection": "lwb_nutzungsflaechen",
+  "properties": {
+    "datetime": "2026-01-09T20:03:35Z",
+    "title": "Nutzungsflächen - Kanton ZH"
+  },
+  "assets": {
+    "interlis": {
+      "href": "https://geodienste.ch/downloads/interlis/lwb_nutzungsflaechen/ZH/lwb_nutzungsflaechen_v2_0_ZH_lv95.zip",
+      "title": "Nutzungsflächen - Kanton ZH - EPSG:2056 (ITF/XTF ZIP)",
+      "type": "application/zip",
+      "file:size": 78175301,
+      "file:checksum": "d51039386239386663366636386430303163",
+      "md5": "98b98fc6f68d001cf1666be6074cbf59",
+      "roles": ["data"]
+    },
+    "geopackage_zip": {
+      "href": "https://geodienste.ch/downloads/geopackage/lwb_nutzungsflaechen/ZH/deu/lwb_nutzungsflaechen_v2_0_ZH_gpkg_lv95.zip",
+      "title": "Nutzungsflächen - Kanton ZH - EPSG:2056 (GPKG ZIP)",
+      "type": "application/zip",
+      "file:size": 54733467,
+      "file:checksum": "d51037323262303163396666663933623838",
+      "md5": "722b01c9fff93b880dc2d5ecb39f3add",
+      "roles": ["data"]
+    },
+    "shapefile_zip": {
+      "href": "https://geodienste.ch/downloads/shapefile/lwb_nutzungsflaechen/ZH/deu/lwb_nutzungsflaechen_v2_0_ZH_shp_lv95.zip",
+      "title": "Nutzungsflächen - Kanton ZH - EPSG:2056 (SHP ZIP)",
+      "type": "application/zip",
+      "file:size": 48072810,
+      "file:checksum": "d51065633861313234663732383335366334",
+      "md5": "ec8a124f728356c40bf84cd1da30cfb8",
+      "roles": ["data"]
+    }
+  }
+}

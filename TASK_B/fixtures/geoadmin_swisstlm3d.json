@@ -1,0 +1,18 @@
+{
+  "stac_version": "1.0.0",
+  "id": "ch.swisstopo.swisstlm3d",
+  "title": "swissTLM3D",
+  "description": "swissTLM3D is the large-scale topographical landscape model of Switzerland.",
+  "summaries": {"proj:epsg": [2056]},
+  "extent": {
+    "spatial": {"bbox": [[5.2229406, 45.3204053, 11.477436, 48.300071]]},
+    "temporal": {"interval": [["2020-03-01T00:00:00Z", "2026-02-24T00:00:00Z"]]}
+  },
+  "license": "proprietary",
+  "created": "2021-02-05T13:57:36.712903Z",
+  "updated": "2026-02-23T15:40:03.296813Z",
+  "crs": ["http://www.opengis.net/def/crs/OGC/1.3/CRS84"],
+  "itemType": "Feature",
+  "assets": {},
+  "type": "Collection"
+}

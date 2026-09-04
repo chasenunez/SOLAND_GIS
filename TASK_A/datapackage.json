@@ -1,0 +1,457 @@
+{
+  "$comment": "Machine-readable metadata for ARA_WWTP_2019_2025, the twin of Eawag_ARA_2019_2025_Readme_v2.txt. Validates as a Frictionless Data Package: check with `frictionless validate datapackage.json`. Values that are not yet known are NOT written into spec-typed fields, because a placeholder string in an integer field makes the whole descriptor unreadable and takes every other field down with it. They are listed under `eawag:pending` instead, where they stay visible without breaking anything.",
+  "name": "ara-wwtp-2019-2025",
+  "title": "Wastewater treatment plants of Switzerland: catchments, plant locations and discharge points, 2019 to 2025",
+  "description": "Yearly spatial datasets of Swiss wastewater treatment plants (ARA/WWTP) for 2019 to 2025. Each year has three layers: catchment polygons (EZG), plant location points, and discharge point locations. Built at Eawag by updating the ARA_2014 dataset from geodienste.ch, the VSA database, and cantonal and municipal sources. Not an official federal product; collecting cantonal wastewater data is the responsibility of the FOEN, whose collection has not been updated consistently since 2014.",
+  "version": "1.0",
+  "created": "2026-07-28T00:00:00Z",
+  "keywords": [
+    "wastewater treatment",
+    "Abwasserreinigungsanlage",
+    "ARA",
+    "WWTP",
+    "Kläranlage",
+    "catchment",
+    "Einzugsgebiet",
+    "discharge point",
+    "Einleitstelle",
+    "sewage",
+    "Switzerland",
+    "water"
+  ],
+  "contributors": [
+    {
+      "title": "Rebekka Gulde",
+      "role": "author",
+      "organization": "Eawag, Swiss Federal Institute of Aquatic Science and Technology"
+    },
+    {
+      "title": "Yannick Burkard",
+      "role": "author",
+      "organization": "Eawag, Swiss Federal Institute of Aquatic Science and Technology"
+    },
+    {
+      "title": "Katia Soland",
+      "role": "contact",
+      "email": "katia.soland@eawag.ch",
+      "organization": "Eawag, Swiss Federal Institute of Aquatic Science and Technology"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Kläranlagendatenbank (ARA-DB), FOEN",
+      "path": "https://www.geocat.ch/geonetwork/srv/api/records/461ae099-e669-43e6-91ee-304749c65cff",
+      "eawag:identifier": "ch.bafu.gewaesserschutz-klaeranlagen",
+      "eawag:publisher": "Federal Office for the Environment FOEN, Abteilung Wasser",
+      "eawag:version": "data status 2014-01-01",
+      "$comment": "Also registered as Geobasisdatensatz 134.5. The geocat record states both 'Opendata BY: Freie Nutzung, Quellenangabe ist Pflicht' and a usage restriction of 'gebührenpflichtig'. Those conflict; clarify with wasser@bafu.admin.ch before any external release."
+    },
+    {
+      "title": "Abwasserreinigungsanlagen (ARA) ohne Finanzkennzahlen, geodienste.ch",
+      "path": "https://geodienste.ch/services/klaeranlagen_ohne_finanzkennzahlen",
+      "eawag:identifier": "klaeranlagen_ohne_finanzkennzahlen",
+      "eawag:publisher": "Cantons, via geodienste.ch (KGK/CGC)",
+      "eawag:version": "MGDM 1.2 (offering version 1.2.0)",
+      "eawag:infoEndpoint": "https://geodienste.ch/info/services.json?base_topics=klaeranlagen_ohne_finanzkennzahlen",
+      "$comment": "Built on Geobasisdatensatz 134.5 (Kläranlagendatenbank ARA-DB) and 128.1 (Regionale Entwässerungsplanung). Terms and publication timestamps are set per canton, not centrally; query eawag:infoEndpoint for the current picture. On 2026-08-10, 11 of 27 listed cantons and principalities were publishing this topic."
+    },
+    {
+      "title": "VSA Datenbank",
+      "path": "https://www.vsa.ch/",
+      "eawag:publisher": "Verband Schweizer Abwasser- und Gewässerschutzfachleute (VSA)"
+    },
+    {
+      "title": "Kläranlagen der Schweiz ©2014, Eawag (ARA_2014)",
+      "eawag:publisher": "Eawag",
+      "eawag:version": "2014",
+      "$comment": "Internal only, currently at Q:\\Querprojekte\\GeoData\\Geodata_CH\\by_provider\\Eawag\\ARA_WWTP\\ARA_2014. Has no persistent identifier, so this dataset's provenance chain terminates in a drive letter."
+    },
+    {
+      "title": "Cantonal and municipal sources",
+      "eawag:publisher": "various cantons and municipalities",
+      "$comment": "Not individually enumerated in the source readme. See eawag:pending."
+    }
+  ],
+  "resources": [
+    {
+      "name": "ara-ezg-2019",
+      "path": "ARA_2019.gpkg",
+      "title": "Catchment areas 2019",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/catchment.json",
+      "eawag:layer": "ARA_EZG_2019",
+      "eawag:geometryType": "Polygon",
+      "eawag:featureCount": 676,
+      "eawag:temporalCoverage": {
+        "start": "2019-01-01",
+        "end": "2019-12-31"
+      }
+    },
+    {
+      "name": "ara-loc-2019",
+      "path": "ARA_2019.gpkg",
+      "title": "Plant locations 2019",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/location.json",
+      "eawag:layer": "ARA_loc_2019",
+      "eawag:geometryType": "Point",
+      "eawag:featureCount": 676,
+      "eawag:temporalCoverage": {
+        "start": "2019-01-01",
+        "end": "2019-12-31"
+      }
+    },
+    {
+      "name": "ara-inlet-2019",
+      "path": "ARA_2019.gpkg",
+      "title": "Discharge points 2019",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/discharge.json",
+      "eawag:layer": "ARA_inlet_2019",
+      "eawag:geometryType": "Point",
+      "eawag:featureCount": 676,
+      "eawag:temporalCoverage": {
+        "start": "2019-01-01",
+        "end": "2019-12-31"
+      }
+    },
+    {
+      "name": "ara-ezg-2020",
+      "path": "ARA_2020.gpkg",
+      "title": "Catchment areas 2020",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/catchment.json",
+      "eawag:layer": "ARA_EZG_2020",
+      "eawag:geometryType": "Polygon",
+      "eawag:featureCount": 666,
+      "eawag:temporalCoverage": {
+        "start": "2020-01-01",
+        "end": "2020-12-31"
+      }
+    },
+    {
+      "name": "ara-loc-2020",
+      "path": "ARA_2020.gpkg",
+      "title": "Plant locations 2020",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/location.json",
+      "eawag:layer": "ARA_loc_2020",
+      "eawag:geometryType": "Point",
+      "eawag:featureCount": 666,
+      "eawag:temporalCoverage": {
+        "start": "2020-01-01",
+        "end": "2020-12-31"
+      }
+    },
+    {
+      "name": "ara-inlet-2020",
+      "path": "ARA_2020.gpkg",
+      "title": "Discharge points 2020",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/discharge.json",
+      "eawag:layer": "ARA_inlet_2020",
+      "eawag:geometryType": "Point",
+      "eawag:featureCount": 666,
+      "eawag:temporalCoverage": {
+        "start": "2020-01-01",
+        "end": "2020-12-31"
+      }
+    },
+    {
+      "name": "ara-ezg-2021",
+      "path": "ARA_2021.gpkg",
+      "title": "Catchment areas 2021",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/catchment.json",
+      "eawag:layer": "ARA_EZG_2021",
+      "eawag:geometryType": "Polygon",
+      "eawag:featureCount": 655,
+      "eawag:temporalCoverage": {
+        "start": "2021-01-01",
+        "end": "2021-12-31"
+      }
+    },
+    {
+      "name": "ara-loc-2021",
+      "path": "ARA_2021.gpkg",
+      "title": "Plant locations 2021",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/location.json",
+      "eawag:layer": "ARA_loc_2021",
+      "eawag:geometryType": "Point",
+      "eawag:featureCount": 655,
+      "eawag:temporalCoverage": {
+        "start": "2021-01-01",
+        "end": "2021-12-31"
+      }
+    },
+    {
+      "name": "ara-inlet-2021",
+      "path": "ARA_2021.gpkg",
+      "title": "Discharge points 2021",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/discharge.json",
+      "eawag:layer": "ARA_inlet_2021",
+      "eawag:geometryType": "Point",
+      "eawag:featureCount": 655,
+      "eawag:temporalCoverage": {
+        "start": "2021-01-01",
+        "end": "2021-12-31"
+      }
+    },
+    {
+      "name": "ara-ezg-2022",
+      "path": "ARA_2022.gpkg",
+      "title": "Catchment areas 2022",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/catchment.json",
+      "eawag:layer": "ARA_EZG_2022",
+      "eawag:geometryType": "Polygon",
+      "eawag:featureCount": 650,
+      "eawag:temporalCoverage": {
+        "start": "2022-01-01",
+        "end": "2022-12-31"
+      }
+    },
+    {
+      "name": "ara-loc-2022",
+      "path": "ARA_2022.gpkg",
+      "title": "Plant locations 2022",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/location.json",
+      "eawag:layer": "ARA_loc_2022",
+      "eawag:geometryType": "Point",
+      "eawag:featureCount": 650,
+      "eawag:temporalCoverage": {
+        "start": "2022-01-01",
+        "end": "2022-12-31"
+      }
+    },
+    {
+      "name": "ara-inlet-2022",
+      "path": "ARA_2022.gpkg",
+      "title": "Discharge points 2022",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/discharge.json",
+      "eawag:layer": "ARA_inlet_2022",
+      "eawag:geometryType": "Point",
+      "eawag:featureCount": 650,
+      "eawag:temporalCoverage": {
+        "start": "2022-01-01",
+        "end": "2022-12-31"
+      }
+    },
+    {
+      "name": "ara-ezg-2023",
+      "path": "ARA_2023.gpkg",
+      "title": "Catchment areas 2023",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/catchment.json",
+      "eawag:layer": "ARA_EZG_2023",
+      "eawag:geometryType": "Polygon",
+      "eawag:featureCount": 639,
+      "eawag:temporalCoverage": {
+        "start": "2023-01-01",
+        "end": "2023-12-31"
+      }
+    },
+    {
+      "name": "ara-loc-2023",
+      "path": "ARA_2023.gpkg",
+      "title": "Plant locations 2023",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/location.json",
+      "eawag:layer": "ARA_loc_2023",
+      "eawag:geometryType": "Point",
+      "eawag:featureCount": 639,
+      "eawag:temporalCoverage": {
+        "start": "2023-01-01",
+        "end": "2023-12-31"
+      }
+    },
+    {
+      "name": "ara-inlet-2023",
+      "path": "ARA_2023.gpkg",
+      "title": "Discharge points 2023",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/discharge.json",
+      "eawag:layer": "ARA_inlet_2023",
+      "eawag:geometryType": "Point",
+      "eawag:featureCount": 639,
+      "eawag:temporalCoverage": {
+        "start": "2023-01-01",
+        "end": "2023-12-31"
+      }
+    },
+    {
+      "name": "ara-ezg-2024",
+      "path": "ARA_2024.gpkg",
+      "title": "Catchment areas 2024",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/catchment.json",
+      "eawag:layer": "ARA_EZG_2024",
+      "eawag:geometryType": "Polygon",
+      "eawag:featureCount": 636,
+      "eawag:temporalCoverage": {
+        "start": "2024-01-01",
+        "end": "2024-12-31"
+      }
+    },
+    {
+      "name": "ara-loc-2024",
+      "path": "ARA_2024.gpkg",
+      "title": "Plant locations 2024",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/location.json",
+      "eawag:layer": "ARA_loc_2024",
+      "eawag:geometryType": "Point",
+      "eawag:featureCount": 636,
+      "eawag:temporalCoverage": {
+        "start": "2024-01-01",
+        "end": "2024-12-31"
+      }
+    },
+    {
+      "name": "ara-inlet-2024",
+      "path": "ARA_2024.gpkg",
+      "title": "Discharge points 2024",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/discharge.json",
+      "eawag:layer": "ARA_inlet_2024",
+      "eawag:geometryType": "Point",
+      "eawag:featureCount": 636,
+      "eawag:temporalCoverage": {
+        "start": "2024-01-01",
+        "end": "2024-12-31"
+      }
+    },
+    {
+      "name": "ara-ezg-2025",
+      "path": "ARA_2025.gpkg",
+      "title": "Catchment areas 2025",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/catchment.json",
+      "eawag:layer": "ARA_EZG_2025",
+      "eawag:geometryType": "Polygon",
+      "eawag:featureCount": 633,
+      "eawag:temporalCoverage": {
+        "start": "2025-01-01",
+        "end": "2025-12-31"
+      }
+    },
+    {
+      "name": "ara-loc-2025",
+      "path": "ARA_2025.gpkg",
+      "title": "Plant locations 2025",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/location.json",
+      "eawag:layer": "ARA_loc_2025",
+      "eawag:geometryType": "Point",
+      "eawag:featureCount": 633,
+      "eawag:temporalCoverage": {
+        "start": "2025-01-01",
+        "end": "2025-12-31"
+      }
+    },
+    {
+      "name": "ara-inlet-2025",
+      "path": "ARA_2025.gpkg",
+      "title": "Discharge points 2025",
+      "format": "gpkg",
+      "mediatype": "application/geopackage+sqlite3",
+      "schema": "schemas/discharge.json",
+      "eawag:layer": "ARA_inlet_2025",
+      "eawag:geometryType": "Point",
+      "eawag:featureCount": 633,
+      "eawag:temporalCoverage": {
+        "start": "2025-01-01",
+        "end": "2025-12-31"
+      }
+    }
+  ],
+  "eawag:publicationStatus": "internal",
+  "eawag:accessConditions": "Available within Eawag on request to Katia Soland (katia.soland@eawag.ch). External release is pending FOEN's response.",
+  "eawag:languages": {
+    "data": "de",
+    "metadata": "en"
+  },
+  "eawag:spatial": {
+    "place": "Switzerland",
+    "crs": "EPSG:2056",
+    "crsName": "CH1903+ / LV95",
+    "$comment": "No bounding box yet, and none invented. Compute it from the data rather than quoting a nominal Swiss extent: gpd.read_file(path, layer=...).to_crs(4326).total_bounds, recorded as west, south, east, north."
+  },
+  "eawag:temporal": {
+    "start": "2019-01-01",
+    "end": "2025-12-31",
+    "$comment": "Whether each yearly layer is a year-end snapshot or the accumulated changes during that year is not yet settled. See eawag:pending."
+  },
+  "eawag:relatedIdentifiers": [
+    {
+      "relationType": "IsDerivedFrom",
+      "identifier": "ch.bafu.gewaesserschutz-klaeranlagen",
+      "title": "Kläranlagendatenbank (ARA-DB), FOEN"
+    },
+    {
+      "relationType": "IsDerivedFrom",
+      "identifier": "https://geodienste.ch/services/klaeranlagen_ohne_finanzkennzahlen",
+      "title": "Abwasserreinigungsanlagen (ARA) ohne Finanzkennzahlen, geodienste.ch"
+    },
+    {
+      "relationType": "References",
+      "identifier": "https://www.geocat.ch/geonetwork/srv/api/records/461ae099-e669-43e6-91ee-304749c65cff",
+      "title": "geocat.ch metadata record for the FOEN ARA-DB"
+    },
+    {
+      "relationType": "IsNewVersionOf",
+      "identifier": "unassigned",
+      "title": "Kläranlagen der Schweiz ©2014, Eawag"
+    }
+  ],
+  "eawag:geocatCrosswalk": {
+    "$comment": "Mapping from the keys above to the ISO 19115 / eCH-0271 elements geocat.ch expects, so this file can seed a geocat record instead of being retyped by hand.",
+    "title": "gmd:identificationInfo/gmd:citation/gmd:title",
+    "description": "gmd:identificationInfo/gmd:abstract",
+    "keywords": "gmd:descriptiveKeywords/gmd:keyword",
+    "contributors": "gmd:pointOfContact/gmd:CI_ResponsibleParty",
+    "licenses": "gmd:resourceConstraints/gmd:MD_LegalConstraints",
+    "eawag:spatial.crs": "gmd:referenceSystemInfo/gmd:MD_ReferenceSystem",
+    "eawag:temporal": "gmd:extent/gmd:EX_TemporalExtent",
+    "version": "gmd:identificationInfo/gmd:citation/gmd:edition",
+    "sources": "gmd:dataQualityInfo/gmd:lineage/gmd:LI_Lineage/gmd:source"
+  },
+  "eawag:pending": [
+    "id: mint a DataCite DOI via ERIC/open (opendata.eawag.ch) on publication and set it as the package id.",
+    "licenses: undecided while the dataset is internal. Recommendation on release is CC-BY-4.0, compatible with the Opendata BY terms of the FOEN source. A licences array is deliberately absent rather than filled with a placeholder.",
+    "contributors: ORCIDs for all three authors, and email addresses for Rebekka Gulde and Yannick Burkard.",
+    "sources: retrieval date for each source. geodienste publishes a per-canton timestamp and cantons update independently, so a compilation without one does not identify a particular state of the world.",
+    "sources: terms of use for the VSA database, and an enumeration of the cantonal and municipal sources, or a pointer to where they are recorded.",
+    "resources: byte sizes and sha256 checksums. Generate with `shasum -a 256 ARA_*.gpkg`, then add `bytes` and `hash` to each resource.",
+    "eawag:spatial: bounding box in WGS84, computed from the data.",
+    "eawag:spatial: vertical datum for m_ueber_Meer, LN02 or LHN95.",
+    "eawag:temporal: whether each yearly layer is a year-end snapshot or the accumulated changes during that year.",
+    "schemas/discharge.json: what GEWISS stands for. It appears as a keyword in the FOEN geocat record but the expansion was not verified.",
+    "schemas/catchment.json: whether alternative_ARA_Nr is one column or two.",
+    "All schemas: the missing-value convention actually used in the files."
+  ]
+}

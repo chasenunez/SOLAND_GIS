@@ -1,0 +1,47 @@
+{
+  "services": [
+    {
+      "topic_title": "Nutzungsflächen",
+      "base_topic": "lwb_nutzungsflaechen",
+      "topic": "lwb_nutzungsflaechen_v2_0",
+      "version": "2.0",
+      "canton": "ZH",
+      "updated_at": "2026-01-09T21:03:35",
+      "cantonal_coverage": true,
+      "data_update_cycle": "Jährlich",
+      "publication_data": "Frei erhältlich",
+      "opendata_terms_data": "Freie Nutzung",
+      "terms_of_use_data": "https://geo.zh.ch/terms-of-use",
+      "stac_item_url": "https://geodienste.ch/stac/collections/lwb_nutzungsflaechen/items/lwb_nutzungsflaechen_v2_0-ZH",
+      "dataset_url": "https://geodienste.ch/downloads/interlis/lwb_nutzungsflaechen/ZH/lwb_nutzungsflaechen_v2_0_ZH_lv95.zip"
+    },
+    {
+      "topic_title": "Nutzungsflächen",
+      "base_topic": "lwb_nutzungsflaechen",
+      "topic": "lwb_nutzungsflaechen_v3_0",
+      "version": "3.0",
+      "canton": "AG",
+      "updated_at": "2026-03-02T04:15:10",
+      "cantonal_coverage": true,
+      "data_update_cycle": "Jährlich",
+      "publication_data": "Frei erhältlich",
+      "opendata_terms_data": "Freie Nutzung. Quellenangabe ist Pflicht.",
+      "stac_item_url": "https://geodienste.ch/stac/collections/lwb_nutzungsflaechen/items/lwb_nutzungsflaechen_v3_0-AG",
+      "dataset_url": "https://geodienste.ch/downloads/interlis/lwb_nutzungsflaechen/AG/lwb_nutzungsflaechen_v3_0_AG_lv95.zip"
+    },
+    {
+      "topic_title": "Nutzungsflächen",
+      "base_topic": "lwb_nutzungsflaechen",
+      "topic": "lwb_nutzungsflaechen_v3_0",
+      "version": "3.0",
+      "canton": "GL",
+      "updated_at": null,
+      "cantonal_coverage": false,
+      "data_update_cycle": "Unbekannt",
+      "publication_data": "Im Aufbau",
+      "opendata_terms_data": null,
+      "stac_item_url": null,
+      "dataset_url": null
+    }
+  ]
+}

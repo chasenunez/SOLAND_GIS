@@ -1,0 +1,503 @@
+# =============================================================================
+# CODE REVIEW: TLM / LN COMBINATION WORKFLOW
+#
+# Prepared for Katia Soland, Eawag. Reviewer: Lib4RI.
+# Date: 2026-08-10.
+#
+# Reviewed: 01_tlm_prepare.ipynb, 02_ln_tlm_yearly_calc.ipynb,
+#           TLM_LN_Combination_Concept.pdf and its corrected version, and both
+#           lookup tables on the GeoData drive, which was treated as read-only.
+#
+# ORIENTATION
+#   Sections 1 to 2   Findings that change results, or will do so later.
+#   Sections 3 to 6   Robustness, reproducibility, performance, tidying.
+#   Sections 7 to 8   One unverified assumption and one open decision.
+#   Sections 9 to 10  What is in the folder, and a suggested order of work.
+#
+# The original notebooks are untouched. The rewritten versions are in this
+# folder.
+# =============================================================================
+
+
+STARTING POINT
+
+The existing code was stronger than most research code of this kind. The
+functions had docstrings and type hints, geometry validity was handled rather
+than ignored, the CRS was stated explicitly, and the notebooks plotted a map after
+each step. Most of what follows builds on that rather than replacing it.
+
+Scope of verification:
+  Every finding below is either verified against the lookup tables, which were readable, 
+  or demonstrated on small synthetic geometries where the expected answer can be calculated by hand.
+  When you get a chance, run it with the appropriate drives to make sure it all works as intended. 
+
+
+SUMMARY OF WHAT WAS DONE
+
+  Affects results     4   Output differs once fixed
+  Correctness risk    4   Wrong under conditions that have not occurred yet
+  Robustness          5   Failures that would be hard to diagnose
+  Reproducibility     3   Cannot tie an output back to its inputs
+  Performance         2   Correct but far slower than necessary
+  Tidying             4   No behaviour change
+
+
+1. AFFECTS RESULTS
+
+1.1 Class 6 was dropped where only group 99 should have been
+
+Was:
+  select_ln_for_final_merge kept Class_Code != 6.
+
+The evidence:
+  Class code 6 is "Flaechen ausserhalb der LN", and it contains real ground
+  cover: ponds and ditches (904), ruderal areas and stone piles (905), dry
+  stone walls (906), unpaved natural paths (907), region-specific biodiversity
+  areas (908), home gardens (909). All carry ueberlagernd = 0.
+
+  Group code 99 is "Ueberlagernde Flaechen" / "Overlap_area" and contains
+  exactly four codes: Hochstamm-Feldobstbaeume (921), Nussbaeume (922),
+  Edelkastanienbaeume (923), Einheimische Einzelbaeume und Alleen (924). All
+  four carry ueberlagernd = 1.
+  # Three independent signals agree, which confirms the reading of the older
+  # documentation that prompted this correction.
+
+Now:
+  geometry.select_by_group(ln, overlap_group_code=99), with the code in
+  config.toml rather than inside a function. Both halves are returned, and the
+  dropped half is written out as LN_<year>_overlay_dropped so it can be
+  inspected rather than disappearing.
+
+Effect:
+  Ponds, walls, paths and gardens now appear in the output. The LN share of
+  the total area should rise slightly.
+
+
+1.2 The final layer carried two parallel classification schemas
+
+Was:
+  Notebook 01 wrote class, class_code, group_code, pest_code. Notebook 02's LN
+  side carried Class, Class_Code, Group_Code, Pest_Code from the lookup.
+  build_final_tlm_ln concatenated them, so TLM_LN_<year> ended up with both
+  families, each populated for only half the rows, and no single field to
+  symbolise or select on.
+  # The show_info call in the last cell requests all seven column names at
+  # once, which suggests the ambiguity had already been noticed.
+
+Now:
+  classify.harmonise renames every LN classification column onto the lowercase
+  schema before the merge and drops the capitalised originals.
+  classify.drop_join_artefacts then removes the columns that existed only to
+  get the join done. A source column records which side each feature came
+  from.
+
+Columns in the published TLM_LN_<year>:
+  class, class_code, group_code, group_de, group_en, class_en,
+  pest_group, pest_code, bff_qi, ueberlagernd, source,
+  lnf_code, objektart, geometry
+
+What was removed and why:
+  Gueltig_Von, Gueltig_Bis, OBJEKTARTD and ID are gone. The validity window
+  describes a code rather than a polygon and has already been read by the
+  validity check, and OBJEKTARTD was the lookup's duplicate of the TLM's own
+  objektart. lnf_code and objektart are kept, since they are what allows a
+  polygon to be traced back to the classification it came from.
+
+Two columns missed on the first pass:
+  Pest_Group and BFF_QI were not in the rename table, so they reached the
+  output capitalised and sat beside lowercase pest_code, which is the same
+  fault on a smaller scale. There is now a test asserting that no column in a
+  harmonised frame differs from its own lowercase form.
+
+Effect:
+  One populated set of classification columns, and no working columns in a
+  published product. Downstream code that referenced Class_Code on the output
+  will need to use class_code.
+
+
+1.3 Three missing-value sentinels were read as literal text
+
+Was:
+  read_lookup_table read the LN lookup with encoding="cp1252", sep=";" and no
+  na_values. The file uses three different sentinels: <Null> throughout, NULL
+  in the Hauptkategorie columns of the overlay rows, and <zero> in crops_en on
+  the "Obstanlagen aggregiert" row.
+
+  None were declared, so those columns arrived as strings containing the
+  literal text "<Null>".
+  # This is the mechanism by which the validity columns came to be ignored:
+  # any numeric comparison against them silently does nothing.
+
+Now:
+  config.LOOKUP_NA_VALUES lists all three, and io.read_lookup_csv applies them.
+
+
+1.4 Trailing whitespace in a lookup value
+
+Was:
+  Group_de is "Reben " with a trailing space on the vine rows. Any groupby,
+  join or comparison against "Reben" splits into two groups without warning.
+
+Now:
+  io.read_lookup_csv strips all string columns on read.
+
+
+2. CORRECTNESS RISK
+
+2.1 Validity windows were never consulted
+
+Was:
+  join_lookup did drop_duplicates(subset=["ID"]) and joined.
+
+A correction to an earlier description:
+  This step was characterised as "keeping whichever row comes first", which
+  implies competing rows. All 174 ids in the Feb 2026 lookup are unique, so
+  the de-duplication is a no-op and validate="many_to_one" already guaranteed
+  the join was safe. That characterisation was inaccurate.
+
+The actual issue:
+  The lookup carries Gueltig_Von and Gueltig_Bis for around thirty codes: Reis
+  (509) to 2022, Hanf (535) to 2021, Hirse (542) to 2022, Sorghum (549) to
+  2022, Nassreis (529) from 2023, Kichererbsen (540) from 2023.
+  Ackerschonstreifen appears twice under different ids, 555 to 2022 and 950
+  from 2023, so it was renumbered rather than reused.
+
+  The workflow runs one year at a time but joins against the full lookup, and
+  nothing checks that a code was valid in the year being processed. A 2019
+  dataset containing code 950, or a 2025 dataset containing 509, joins
+  successfully and receives a class, with no error and no warning.
+
+Now:
+  classify.check_code_validity runs after the join and reports any code
+  outside its window, with the count of features affected. It warns rather
+  than fails, since it is not established whether cantonal entry systems
+  restrict farmers to currently valid codes. The report is written to
+  reports_<year>/code_validity.csv.
+
+A forward-looking change:
+  join_ln_lookup now asserts the lookup key is unique instead of quietly
+  de-duplicating. Validity windows exist precisely so that a code can appear
+  more than once; if a future lookup revision does that, silently keeping one
+  row would resolve it wrongly and without comment. It now raises, with a
+  message pointing at filtering by year.
+
+
+2.2 Two codes flagged as overlaying are not excluded
+
+The discrepancy:
+  Six codes in the lookup carry ueberlagernd = 1. Only four are in group 99.
+  The other two are:
+    927  Andere Baeume (regionsspezifische Biodiversitaetsfoerderflaeche)
+    928  Andere Elemente (regionsspezifische Biodiversitaetsfoerderflaeche)
+
+  Both sit in group 60, "Sonstiges", so under the corrected group-99 rule they
+  are kept, even though the LN data model records them as overlaying something
+  else. Trees of this kind generally sit on top of a meadow or pasture, and
+  counting them as their own surface counts that area twice.
+
+Status:
+  The rule has been left unchanged, since whether this is an oversight in the
+  lookup or deliberate cannot be determined from outside.
+  classify.check_overlap_flag_consistency reports it on every run, to
+  reports_<year>/overlap_flag_mismatch.csv.
+  # If the two codes should be excluded, the cleaner fix is in the lookup
+  # rather than in the code: moving them to group 99 makes every year rerun
+  # consistently.
+
+
+2.3 The lookup was de-duplicated on the wrong key
+
+Was:
+  prepare_bodenbedeckung did lut.drop_duplicates("OBJECTID *") and then merged
+  on OBJEKTARTD. De-duplicating on a column that is not the join key leaves
+  duplicates on the key that is used.
+  # TLM_LUT.csv currently has unique OBJEKTARTD values, so this has not caused
+  # a failure. If a duplicate appeared, validate="many_to_one" would raise
+  # partway through a four-minute step.
+
+Now:
+  De-duplication is on OBJEKTARTD, with a warning if any duplicates are found.
+
+
+2.4 Unmatched classes were silently unclassified
+
+Was:
+  The left join left class as NaN for any objektart absent from the lookup,
+  and nothing reported it. A new swissTLM3D land cover class would arrive as
+  unclassified polygons that no downstream selection would ever see.
+  # The lookup has 18 rows, three of which (Siedlung, Obst, Reben) serve other
+  # layers, so only 15 cover Bodenbedeckung. A new class is plausible.
+
+Now:
+  Unmatched values are logged with their counts, and
+  validate.classification_completeness reports what fraction of the output
+  carries no class, by feature count and by area.
+
+
+3. ROBUSTNESS
+
+3.1 Cells that reference variables before they exist
+
+Was:
+  Notebook 01 cell 14 prints tlm_bb.columns before cell 15 creates tlm_bb.
+  Notebook 02 cell 16 calls overlaps.loc[...].iloc[0] and cell 19 reads
+  overlaps; both raise NameError when create_overlap_layer = False, and cell
+  16 additionally raises IndexError if there are no GeometryCollections.
+  # The config default sets that flag to True, so the failure only appears
+  # once someone turns it off.
+
+Now:
+  Resolved by the notebooks becoming linear drivers with no out-of-order
+  state.
+
+
+3.2 Silent empty results
+
+Was:
+  prepare_obst_reben selects objektart in ["Obstanlage", "Reben"], and
+  prepare_siedlung selects objektart == "Ort". If swisstopo renames a value,
+  the selection returns an empty frame and the workflow runs to completion
+  producing an empty layer.
+
+Now:
+  Both raise, listing the objektart values actually present, which is the
+  information needed to correct the selection. io.read_vector also rejects an
+  empty layer.
+
+
+3.3 No CRS assertion before overlays
+
+Was:
+  An overlay between two different projections returns an empty result rather
+  than an error. read_vector reprojected, so this was handled in practice, but
+  nothing verified it afterwards.
+
+Now:
+  validate.assert_crs runs on every layer before the overlays.
+
+
+3.4 No sliver removal
+
+Was:
+  gpd.overlay(how="difference") on adjacent polygons leaves slivers a few
+  square centimetres across, which are artefacts of floating-point arithmetic
+  rather than features of the landscape. Left in place they inflate feature
+  counts and clutter any map drawn from the result.
+
+Now:
+  geometry.erase drops polygons below min_polygon_area_m2, default 1.0, and
+  logs how many. Setting it to 0 reproduces the previous behaviour exactly.
+
+
+3.5 Non-deterministic duplicate removal
+
+Was:
+  remove_identical_geometries kept keep="first" on file order. Since the LN
+  inputs are concatenated from the v2 and v3 shapefile trees, swapping the
+  order of ln_inputs in the config changed which row survived: the same inputs
+  produced different output.
+
+Now:
+  The frame is sorted by a stated priority column before de-duplication, so
+  the choice is a rule rather than an accident. There is a test for it.
+
+A limitation to record:
+  The concept diagram footnotes that some fields are cropped several times a
+  year, which is why identical geometries carry different codes. Keeping one
+  of them discards that information rather than representing it. If
+  multi-cropping matters to a downstream user, it requires a data model that
+  can hold more than one use per polygon. That is a design question rather
+  than a defect, and it falls outside the scope of these changes.
+
+
+4. REPRODUCIBILITY
+
+4.1 Hardcoded Windows paths inside a frozen dataclass
+
+Was:
+  Every path was a Q: literal inside Config, so running anywhere else required
+  editing code. output_gpkg also used an f-string referencing year at
+  class-body scope, which works only because it is a plain default and would
+  break as soon as year became a real parameter.
+
+Now:
+  config.toml, with {year} substituted at run time and relative paths resolved
+  against the config file. One line covers every year.
+
+
+4.2 No record of what produced an output
+
+Was:
+  A GeoPackage from six months earlier could not be tied to the TLM release
+  and lookup vintage that produced it.
+
+Now:
+  Every run writes <output>.manifest.json with input paths, sizes,
+  modification times, sha256 checksums for inputs under a gigabyte, the
+  geopandas, pandas, shapely and pyogrio versions, and the settings used.
+
+
+4.3 Validation only in the log
+
+Was:
+  The statistics cell computed useful numbers and displayed them, after which
+  they were lost when the log scrolled.
+
+Now:
+  Every check writes a CSV to reports_<year>/, beside the data, so the
+  question of whether anything was unusual about a given year's run can be
+  answered later.
+
+
+5. PERFORMANCE
+
+5.1 The overlap counter was a Python loop
+
+Was:
+  count_overlapping_features iterated every geometry, queried an STRtree, then
+  intersected pair by pair in Python. On several hundred thousand LN features
+  that runs to hours. It also recorded positional indices rather than stable
+  ids, so the output could not be joined back to the source features.
+
+Now:
+  geometry.find_overlaps uses a spatial self-join, keeps each unordered pair
+  once, and vectorises the intersection. It excludes zero-area results, since
+  two polygons sharing an edge are adjacent rather than overlapping and
+  counting them inflates the total. It records lnf_code rather than row
+  numbers.
+  # No measured speedup can be quoted without the production data.
+  # Structurally the change is from O(n) Python-level iterations to one
+  # indexed join plus a vectorised intersection.
+
+
+5.2 The overlap layer was on by default
+
+Was:
+  create_overlap_layer defaulted to True, and it is the slowest step in the
+  workflow, for a layer used only for documentation.
+
+Now:
+  Off by default, with a note in the config explaining when to turn it on.
+
+
+6. TIDYING
+
+Unused imports:
+  time and STRtree in notebook 01, fiona and time in notebook 02. STRtree was
+  used in 02 but not in 01.
+
+display() used without importing it:
+  Works inside Jupyter, fails in a script or a test. The package uses logging
+  and returns DataFrames instead.
+
+Classification constants duplicated:
+  Siedlung 75 and Dauerkulturen 3 appear both in TLM_LUT.csv (rows 16, 17, 18)
+  and as literals in the code. The values were checked and agree with each
+  other and with the LN lookup: Reben is class 3, group 30, pest 300, and
+  Obstanlagen is class 3, group 31, pest 310. This is a maintainability point
+  rather than a defect. The values now live in one place in classify.py, with
+  a test asserting they match the LN lookup.
+
+Stale documentation:
+  Notebook 01's header stated "Last analysis done in March 2025 with data from
+  2024" while the config pointed at swissTLM3D 2026.
+
+Naming:
+  overlap_class_code and "the overlap class" described class 6, which is not
+  an overlap class. It is now overlap_group_code. The corrected concept
+  diagram also renames the TLM_{year}_sel box to LN_{year}_sel, which was the
+  other half of the same confusion.
+
+
+7. AN ASSUMPTION THAT COULD NOT BE VERIFIED
+
+The assumption:
+  The workflow erases TLM_Siedl using land cover plus orchards and vineyards,
+  then merges the erased settlements back. This is only coherent if TLM
+  Bodenbedeckung leaves gaps over built-up land.
+
+Supporting evidence:
+  The lookup supports it. Its 15 Bodenbedeckung classes are forest, rock,
+  water, glacier, wetland and loose rock, with no built-up or arable class, so
+  settlements fill real gaps.
+
+What could not be checked:
+  The GeoPackage could not be opened to confirm this directly. prepare_tlm now
+  raises with an explanatory message if the erase leaves nothing, which is
+  what would happen if a future TLM release extended Bodenbedeckung to cover
+  settlements.
+
+
+8. THE OPEN QUESTION
+
+The behaviour:
+  The corrected concept diagram still erases TLM_total with the full
+  LN_{year}, then merges back only LN_{year}_sel. Wherever a group-99 feature
+  does not coincide with another LN polygon, that difference becomes a hole.
+  Isolated trees and avenues (924) are the likely source, since an avenue
+  along a road need not lie inside any other parcel.
+
+The available change:
+  The dataset is not intended to be gapless, but this is one of the gaps that
+  could be closed, and it is a one-line change: erase_with_selected_only =
+  true in the config erases with only the kept features.
+
+Why the default was left alone:
+  It remains false, matching the concept diagram and reproducing existing
+  results, since changing an output without instruction is not appropriate.
+  The pipeline measures the effect instead: reports_<year>/gaps.csv reports
+  the dropped area, the part of it left uncovered, and that part as a
+  percentage. Running 2025 once turns the decision into a number.
+
+Demonstrated in the tests:
+  With a 30,000 m2 TLM polygon and three LN parcels, one of them an overlay:
+    erase with all LN, merge back the selection   20,000 m2, a 10,000 m2 hole
+    erase with the selection only                 30,000 m2, area conserved
+
+
+9. WHAT IS IN THIS FOLDER
+
+  tlm_ln/config.py             Settings and paths, read from TOML
+  tlm_ln/io.py                 Reading, writing, geometry cleaning, manifest
+  tlm_ln/classify.py           Lookup joins, class assignment, validity and
+                               consistency checks
+  tlm_ln/geometry.py           Merge, erase, de-duplicate, find overlaps,
+                               selection
+  tlm_ln/validate.py           Area reconciliation, gap report, completeness,
+                               class summary
+  tlm_ln/pipeline.py           The two workflows as functions
+  config.toml                  The only file normally edited
+  requirements.txt             Package minimums, with the reason for each
+  01_tlm_prepare.ipynb         Driver for the TLM preparation
+  02_ln_tlm_yearly_calc.ipynb  Driver for one year
+  test_tlm_ln.py               64 unit tests on synthetic geometries
+  test_pipeline.py             24 end-to-end tests on synthetic GeoPackages
+  TASK_C_README.txt            How to run it
+  TASK_C_code_review.txt       This document
+
+
+10. SUGGESTED ORDER
+
+1. Run the tests:
+     python test_tlm_ln.py
+     python test_pipeline.py
+   Neither needs data. Together they take a few seconds and confirm the
+   environment before anything touches the real files.
+
+2. Run notebook 01 against the current swissTLM3D with write=False, and read
+   the area table. Siedl_erase should be smaller than TLM_Siedl but not empty.
+
+3. Run notebook 02 for 2025. Read the three check tables: code validity,
+   overlap flag mismatch, and gaps.
+
+4. Decide on erase_with_selected_only from the gap number, and on codes 927
+   and 928 from the mismatch table.
+
+5. Once 2025 is settled, the loop at the end of notebook 02 runs the back
+   series.
+
+Two decisions before step 5:
+  Whether each year should be joined against a lookup of its own vintage
+  rather than the Feb 2026 one, since the validity windows imply the lookup
+  has a history. And whether the back series should be regenerated at all,
+  given that the class-6 correction alters every year's output.
